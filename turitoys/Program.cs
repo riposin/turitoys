@@ -8,7 +8,7 @@ header = """
     -------------------
     Select an option or empty to close
 
-    a: Set materials s4hid from csv to db pos based on sku
+    A: Set materials s4hid from csv to db pos based on sku
     """;
 
 Console.WriteLine(header);
@@ -17,11 +17,11 @@ option = string.IsNullOrEmpty(option) ? option : option.Trim().ToLower();
 
 switch (option)
 {
-    case "a":
-        optiona();
-        break;
-    default:
-        break;
+	case "a":
+		optiona();
+		break;
+	default:
+		break;
 }
 
 Console.WriteLine("""
@@ -30,11 +30,12 @@ Console.WriteLine("""
     """);
 Console.ReadLine();
 
-static void optiona(){
-    string? option;
+static void optiona()
+{
+	string? option;
 
-    Console.Clear();
-    Console.WriteLine("""
+	Console.Clear();
+	Console.WriteLine("""
     Selected option was A
     
     Prerequisites:
@@ -44,21 +45,34 @@ static void optiona(){
     Results:
     1 -
 
-    Press y to proceed or empty to exit
+    Press Y to proceed or empty to close
     """);
-    option = Console.ReadLine();
-    option = string.IsNullOrEmpty(option) ? option : option.Trim().ToLower();
+	option = Console.ReadLine();
+	option = string.IsNullOrEmpty(option) ? option : option.Trim().ToLower();
 
-    if (option != "y") { return; }
+	if (option != "y") { return; }
 
-    MySqlConnection cnn = new("Server=lapqa1.off;User ID=root;Password=Brutus22");
-    try
-    {
-        cnn.OpenAsync().Wait();
-        cnn.Close();
-    }
-    catch (Exception e)
-    { Console.WriteLine("Error during connection: " + e.Message); }
+	MySqlConnection cnn = new("Server=lapqa.hamachi;User ID=root;Password=Brutus22;database=gts");
 
-    return;
+	try
+	{
+		cnn.OpenAsync().Wait();
+	}
+	catch (Exception e)
+	{
+		Console.WriteLine("Error during connection: " + e.Message);
+		return;
+	}
+
+	var command = new MySqlCommand("select * from itm1 where itm1.ItemCode = '4005800144592';", cnn);
+	var reader = command.ExecuteReader();
+	while (reader.Read())
+	{
+		var value = reader.GetValue(0);
+		Console.WriteLine(value);
+	}
+
+	cnn.Close();
+
+	return;
 }
