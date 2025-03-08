@@ -1,7 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using Microsoft.VisualBasic.FileIO;
 using MySqlConnector;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Data.Common;
 
 string? header, option;
@@ -44,6 +46,7 @@ static void optiona()
     Prerequisites:
     1 - A csv file named optionain.csv with 3 columns [mat,des,sku] at least
     2 - A text file named optionacnn.txt with the connection string to the MySQL database of an All Retail POS installation
+    3 - All files are stored next to this turitoys app
 
     Results:
     1 -
@@ -55,7 +58,52 @@ static void optiona()
 
 	if (option != "y") { return; }
 
+
+	DataTable csvData = new();
+	//string jsonString;
 	MySqlConnection cnn = new("Server=lapqa.hamachi;User ID=root;Password=Brutus22;database=gts");
+
+	try
+	{
+		using TextFieldParser csvReader = new("C:\\Users\\JesúsRicardoPoolPech\\Documents\\QA\\z_PrerequisitosInsumos\\PreciosMasivo\\optionain.csv");
+		csvReader.SetDelimiters(new string[] { "," });
+		csvReader.HasFieldsEnclosedInQuotes = true;
+		string[]? colFields;
+		bool tableCreated = false;
+		colFields = csvReader.ReadFields();
+		if (colFields != null)
+		{
+			while (tableCreated == false)
+			{
+				foreach (string column in colFields)
+				{
+					DataColumn datecolumn = new(column)
+					{
+						AllowDBNull = true
+					};
+					csvData.Columns.Add(datecolumn);
+				}
+				tableCreated = true;
+			}
+			while (!csvReader.EndOfData)
+			{
+				string[]? itemFields;
+				itemFields = csvReader.ReadFields();
+				if (itemFields != null)
+				{
+					csvData.Rows.Add();
+				}
+			}
+		}
+		else
+		{
+			Console.WriteLine("CSV: No columns info in first row");
+		}
+	}
+	catch (Exception e)
+	{
+		Console.WriteLine("CSV: Error during reading - " + e.Message);
+	}
 
 	try
 	{
