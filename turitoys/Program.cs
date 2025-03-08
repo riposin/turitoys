@@ -1,5 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using MySqlConnector;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data.Common;
 
 string? header, option;
 
@@ -39,7 +42,7 @@ static void optiona()
     Selected option was A
     
     Prerequisites:
-    1 - A csv file named optionain.csv with 3 columns [mat,des,sku]
+    1 - A csv file named optionain.csv with 3 columns [mat,des,sku] at least
     2 - A text file named optionacnn.txt with the connection string to the MySQL database of an All Retail POS installation
 
     Results:
@@ -64,13 +67,22 @@ static void optiona()
 		return;
 	}
 
-	var command = new MySqlCommand("select * from itm1 where itm1.ItemCode = '4005800144592';", cnn);
+	var command = new MySqlCommand("select itemcode as sku, itemname as des, s4h_id as mat from oitm where oitm.ItemCode = '4005800144592';", cnn);
+
 	var reader = command.ExecuteReader();
+	List<string[]> result = [];
+
 	while (reader.Read())
 	{
-		var value = reader.GetValue(0);
-		Console.WriteLine(value);
+		string[] item = [];
+		foreach (DbColumn col in reader.GetColumnSchema())
+		{
+			item = [.. item, (string)reader[col.ColumnName]];
+		}
+
+		result.Add(item);
 	}
+	Console.WriteLine(result.Count == 0 ? "Not found" : result[0][2]);
 
 	cnn.Close();
 
