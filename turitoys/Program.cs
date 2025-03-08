@@ -50,18 +50,21 @@ static void optiona()
     2 - A log file named optionalog.txt
     3 - All result files have the current date and time as preffix
 
-    Press Y to proceed or empty to close
+    Press Y to compare and update
+    Press V to just compare
+    Press any other or empty to close
     """);
 	option = Console.ReadLine();
 	option = string.IsNullOrEmpty(option) ? option : option.Trim().ToLower();
 
-	if (option != "y") { return; }
+	if (option != "y" && option != "v") { return; }
 
 	string sessionID = DateTime.Now.ToString("yyyyMMddHHmmss");
 	string logFileFullPath = sessionID + "_optionalog.txt";
 	StreamWriter logWriter = File.CreateText(logFileFullPath);
 	string message = "";
 
+	logWriter.WriteLine("Option selected: " + option);
 
 	message = "Reading CSV file, please wait...";
 	logWriter.WriteLine(message);
@@ -134,12 +137,10 @@ static void optiona()
 
 	try
 	{
-		using (StreamReader read = new StreamReader("optionacnn.txt"))
-		{
-			cnnString = read.ReadLine();
-			message = String.IsNullOrEmpty(cnnString) ? "" : cnnString;
-			read.Close();
-		}
+		using StreamReader read = new("optionacnn.txt");
+		cnnString = read.ReadLine();
+		message = String.IsNullOrEmpty(cnnString) ? "" : cnnString;
+		read.Close();
 	}
 	catch(Exception e)
 	{
@@ -149,8 +150,10 @@ static void optiona()
 		Console.WriteLine(message);
 		return;
 	}
-	logWriter.WriteLine(message);
 	cnn = new(message);
+	message = "Connection to use is: " + message;
+	logWriter.WriteLine(message);
+	Console.WriteLine(message);
 	
 	try
 	{
@@ -248,18 +251,20 @@ static void optiona()
 			if (String.IsNullOrEmpty(dbMaterial[0][2]))
 			{
 				noCodeItems++;
-				updateMaterial = true;
+				updateMaterial = (option == "y");
 
 				logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has no material code");
-				message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",no code," + "assigned" + "," + "";
+				message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",no code," + (updateMaterial ? "updated" : "compared") + "," + "";
+				outWriter.WriteLine(message);
 			}
 			else if (dbMaterial[0][2] != csvMaterialS4H)
 			{
 				diffCodeItems++;
-				updateMaterial = true;
+				updateMaterial = (option == "y");
 
 				logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has a different material code(DB vs CSV): " + dbMaterial[0][2] + " <-> " + csvMaterialS4H);
-				message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",diff code," + "updated" + "," + dbMaterial[0][2];
+				message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",diff code," + (updateMaterial ? "updated" : "compared") + "," + dbMaterial[0][2];
+				outWriter.WriteLine(message);
 			}
 			else
 			{
