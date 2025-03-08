@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using MySqlConnector;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 
@@ -72,7 +71,7 @@ static void optiona()
 
 	try
 	{
-		using TextFieldParser csvReader = new("C:\\Users\\JesúsRicardoPoolPech\\Documents\\QA\\z_PrerequisitosInsumos\\PreciosMasivo\\optionain.csv");
+		using TextFieldParser csvReader = new("optionain.csv");
 		csvReader.TextFieldType = FieldType.Delimited;
 		csvReader.SetDelimiters([","]);
 		csvReader.HasFieldsEnclosedInQuotes = true;
@@ -130,10 +129,28 @@ static void optiona()
 	logWriter.WriteLine(message);
 	Console.WriteLine(message);
 
-	message = "Server=localhost;User ID=admin;Password=ricardo;database=gts_2407_114";
+	string? cnnString = "";
+	MySqlConnection cnn;
+
+	try
+	{
+		using (StreamReader read = new StreamReader("optionacnn.txt"))
+		{
+			cnnString = read.ReadLine();
+			message = String.IsNullOrEmpty(cnnString) ? "" : cnnString;
+			read.Close();
+		}
+	}
+	catch(Exception e)
+	{
+		message = "MySQL: Error during reading optionacnn.txt file - " + e.Message;
+		logWriter.WriteLine(message);
+		logWriter.Dispose();
+		Console.WriteLine(message);
+		return;
+	}
 	logWriter.WriteLine(message);
-	//MySqlConnection cnn = new("Server=lapqa.hamachi;User ID=root;Password=Brutus22;database=gts");
-	MySqlConnection cnn = new(message);
+	cnn = new(message);
 	
 	try
 	{
