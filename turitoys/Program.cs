@@ -1,12 +1,13 @@
 ﻿string? header, option;
 
 header = """
-    Turistore toys - QA
-    -------------------
-    Select an option or empty to close
+	Turistore toys - QA
+	-------------------
+	Select an option or empty to close
 
-    A: Set materials s4hid from csv to db pos based on sku
-    """;
+	A: Set materials s4h_id to POS DB based on SKU
+	B: Verify material prices were updated correctly on POS DB
+	""";
 
 Console.WriteLine(header);
 option = Console.ReadLine();
@@ -17,12 +18,15 @@ switch (option)
 	case "a":
 		Program.Optiona();
 		break;
+	case "b":
+		Program.Optionb();
+		break;
 	default:
 		break;
 }
 
 Console.WriteLine("""
 
-    Done, press any key to exit...
-    """);
+	Done, press any key to exit...
+	""");
 Console.ReadLine();

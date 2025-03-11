@@ -11,22 +11,22 @@ public static partial class Program
 
 		Console.Clear();
 		Console.WriteLine("""
-    Selected option was A
-    
-    Prerequisites:
-    1 - A csv file named optionain.csv with 3 columns [mat,des,sku] at least
-    2 - A text file named optionacnn.txt with the connection string to the MySQL database of an All Retail POS installation
-    3 - All prerequisite files are stored next to this turitoys app
+		Selected option was A
 
-    Results:
-    1 - A csv file named optionaout.csv.txt containing the result of the processing
-    2 - A log file named optionalog.txt
-    3 - All result files have the current date and time as preffix
+		Prerequisites:
+		1 - A CSV file named optionain.csv with 3 columns [mat,des,sku] at least
+		2 - A TXT file named optionacnn.txt with the connection string to the MySQL database of an All Retail POS installation
+		3 - All prerequisite files are stored next to this turitoys app
 
-    Press Y to compare and update
-    Press V to just compare
-    Press any other or empty to close
-    """);
+		Results:
+		1 - A csv file named optionaout.csv.txt containing the result of the processing
+		2 - A log file named optionalog.txt
+		3 - All result files have the current date and time as preffix
+
+		Press Y to compare and update
+		Press V to just compare
+		Press any other or empty to close
+		""");
 		option = Console.ReadLine();
 		option = string.IsNullOrEmpty(option) ? option : option.Trim().ToLower();
 
@@ -101,7 +101,7 @@ public static partial class Program
 		}
 
 
-		message = "\nGetting all materials from db to process locally, please wait...";
+		message = "\nGetting all materials from DB to process locally, please wait...";
 		logWriter.WriteLine(message);
 		Console.WriteLine(message);
 
