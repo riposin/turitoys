@@ -130,7 +130,7 @@ public static partial class Program
 			combinations += first ? item.ConditionTable : item.ConditionTable + ",";
 			first = false;
 		}
-		logWriter.WriteLine("Unique ConditionTable: " + combinations);
+		logWriter.WriteLine("Unique ConditionTables: " + combinations);
 
 		try
 		{
@@ -199,7 +199,7 @@ public static partial class Program
 		}
 		else
 		{
-			message = "MySQL: " + resultAll.Count + " prices with combinations in CSV were found";
+			message = "MySQL: " + resultAll.Count + " prices with the unique conditionTables in CSV were found in DB";
 			logWriter.WriteLine(message);
 			Console.WriteLine(message);
 		}
@@ -238,6 +238,7 @@ public static partial class Program
 				outWriter.WriteLine(message + ",not found");
 				message = "The combination |" + message + "| in CSV was not found";
 				logWriter.WriteLine(message);
+				noCoincidence++;
 			}
 			else
 			{
@@ -245,8 +246,11 @@ public static partial class Program
 				message = "The combination |" + message + "| in CSV was found";
 				logWriter.WriteLine(message);
 			}
-
 		}
+		// print results
+		message = noCoincidence + " combinations were not found of " + csvData.Rows.Count + " in CSV";
+		logWriter.WriteLine(message);
+		Console.WriteLine(message);
 
 		outWriter.Close();
 		logWriter.Close();
