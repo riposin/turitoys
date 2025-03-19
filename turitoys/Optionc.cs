@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualBasic.FileIO;
-using MySqlConnector;
 using System.Data.Common;
 using System.Data;
+using Microsoft.Data.SqlClient;
 
 public static partial class Program
 {
-	public static void Optiona()
+	public static void Optionc()
 	{
 		string? option;
 
@@ -14,14 +14,14 @@ public static partial class Program
 		Selected option was A
 
 		Prerequisites:
-		1 - A CSV file named optionain.csv with 3 columns [mat,des,sku] at least
-		2 - A TXT file named optionacnn.txt with the connection string to the MySQL database 
+		1 - A CSV file named optioncin.csv with 3 columns [mat,des,sku] at least
+		2 - A TXT file named optionccnn.txt with the connection string to the SQLServer database
 		3 - The DB must contain at least the OITM table with the columns S4H_ID and ItemCode
 		4 - All prerequisite files are stored next to this turitoys app
 
 		Results:
-		1 - A csv file named optionaout.csv.txt containing the result of the processing
-		2 - A log file named optionalog.txt
+		1 - A csv file named optioncout.csv.txt containing the result of the processing
+		2 - A log file named optionclog.txt
 		3 - All result files have the current date and time as preffix
 
 		Press Y to compare and update
@@ -34,7 +34,7 @@ public static partial class Program
 		if (option != "y" && option != "v") { return; }
 
 		string sessionID = DateTime.Now.ToString("yyyyMMddHHmmss");
-		string logFileFullPath = sessionID + "_optionalog.txt";
+		string logFileFullPath = sessionID + "_optionclog.txt";
 		StreamWriter logWriter = File.CreateText(logFileFullPath);
 		string message = "";
 
@@ -48,7 +48,7 @@ public static partial class Program
 
 		try
 		{
-			using TextFieldParser csvReader = new("optionain.csv");
+			using TextFieldParser csvReader = new("optioncin.csv");
 			csvReader.TextFieldType = FieldType.Delimited;
 			csvReader.SetDelimiters([","]);
 			csvReader.HasFieldsEnclosedInQuotes = true;
@@ -107,23 +107,24 @@ public static partial class Program
 		Console.WriteLine(message);
 
 		string? cnnString = "";
-		MySqlConnection cnn;
+		SqlConnection cnn;
 
 		try
 		{
-			using StreamReader read = new("optionacnn.txt");
+			using StreamReader read = new("optionccnn.txt");
 			cnnString = read.ReadLine();
 			message = String.IsNullOrEmpty(cnnString) ? "" : cnnString;
 			read.Close();
 		}
 		catch (Exception e)
 		{
-			message = "MySQL: Error during reading optionacnn.txt file - " + e.Message;
+			message = "MSSQL: Error during reading optionccnn.txt file - " + e.Message;
 			logWriter.WriteLine(message);
 			logWriter.Dispose();
 			Console.WriteLine(message);
 			return;
 		}
+
 		cnn = new(message);
 		message = "Connection to use is: " + message;
 		logWriter.WriteLine(message);
@@ -135,22 +136,22 @@ public static partial class Program
 		}
 		catch (Exception e)
 		{
-			message = "MySQL: Error during connection - " + e.Message;
+			message = "MSSQL: Error during connection - " + e.Message;
 			logWriter.WriteLine(message);
 			logWriter.Dispose();
 			Console.WriteLine(message);
 			return;
 		}
 
-		MySqlCommand command;
-		MySqlDataReader readerAll;
+		SqlCommand command;
+		SqlDataReader readerAll;
 		List<string[]> resultAll = [];
 		IReadOnlyCollection<DbColumn> columns;
 
 		// SKU always must be first element, check linq.first statement when verifying
 		message = "select itemcode as sku, itemname as des, s4h_id as mat from oitm;";
 		logWriter.WriteLine(message);
-		command = new MySqlCommand(message, cnn);
+		command = new SqlCommand(message, cnn);
 		readerAll = command.ExecuteReader();
 		resultAll = [];
 		columns = readerAll.GetColumnSchema();
@@ -168,7 +169,7 @@ public static partial class Program
 
 		if (resultAll.Count == 0)
 		{
-			message = "MySQL: No materials found";
+			message = "MSSQL: No materials found";
 			logWriter.WriteLine(message);
 			logWriter.Dispose();
 			cnn.Close();
@@ -177,7 +178,7 @@ public static partial class Program
 		}
 		else
 		{
-			message = "MySQL: " + resultAll.Count + " materials found";
+			message = "MSSQL: " + resultAll.Count + " materials found";
 			logWriter.WriteLine(message);
 			Console.WriteLine(message);
 		}
@@ -187,7 +188,7 @@ public static partial class Program
 		logWriter.WriteLine(message);
 		Console.WriteLine(message);
 
-		string outFileFullPath = sessionID + "_optionaout.csv.txt";
+		string outFileFullPath = sessionID + "_optioncout.csv.txt";
 		StreamWriter outWriter = File.CreateText(outFileFullPath);
 		int notFoundItems = 0;
 		int noCodeItems = 0;
@@ -245,7 +246,7 @@ public static partial class Program
 
 				if (updateMaterial)
 				{
-					command = new MySqlCommand(string.Format(sqlUpdateMaterial, csvMaterialS4H, csvMaterialSKU), cnn);
+					command = new SqlCommand(string.Format(sqlUpdateMaterial, csvMaterialS4H, csvMaterialSKU), cnn);
 					updateResult = command.ExecuteNonQuery();
 					if (updateResult > 0)
 					{
