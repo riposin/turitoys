@@ -22,12 +22,12 @@ public static partial class Program
 		1.4 - ConditionValidityStartDate
 		1.5 - ConditionValidityEndDate
 		1.6 - ConditionRateValueText
-		2 - A text file named optionacnn.txt with the connection string to the MySQL database of an All Retail POS installation
+		2 - A text file named optionbcnn.txt with the connection string to the MySQL database of an All Retail POS installation
 		3 - All prerequisite files are stored next to this turitoys app
 
 		Results:
-		1 - A csv file named optionaout.csv.txt containing the result of the processing
-		2 - A log file named optionalog.txt
+		1 - A csv file named optionbout.csv.txt containing the result of the processing
+		2 - A log file named optionblog.txt
 		3 - All result files have the current date and time as preffix
 
 		Press Y to compare
@@ -59,6 +59,7 @@ public static partial class Program
 			csvReader.HasFieldsEnclosedInQuotes = true;
 			string[]? colFields;
 			bool tableCreated = false;
+
 			// Avoid the first line that is the description of the field
 			csvReader.ReadFields();
 			colFields = csvReader.ReadFields();
