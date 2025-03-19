@@ -220,46 +220,48 @@ public static partial class Program
 			}
 			else
 			{
+				updateMaterial = (option == "y");
 				dbMaterial = query.ToList();
 				if (String.IsNullOrEmpty(dbMaterial[0][2]))
 				{
 					noCodeItems++;
-					updateMaterial = (option == "y");
 
 					logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has no material code");
-					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",no code," + (updateMaterial ? "updated" : "compared") + "," + "";
-					outWriter.WriteLine(message);
+					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",no code," + (updateMaterial ? "{0}" : "compared") + "," + "";
 				}
 				else if (dbMaterial[0][2] != csvMaterialS4H)
 				{
 					diffCodeItems++;
-					updateMaterial = (option == "y");
 
 					logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has a different material code(DB vs CSV): " + dbMaterial[0][2] + " <-> " + csvMaterialS4H);
-					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",diff code," + (updateMaterial ? "updated" : "compared") + "," + dbMaterial[0][2];
-					outWriter.WriteLine(message);
+					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",diff code," + (updateMaterial ? "{0}" : "compared") + "," + dbMaterial[0][2];
 				}
 				else
 				{
-					message = "The material SKU " + csvMaterialSKU + " has the same material code(DB vs CSV)";
-					logWriter.WriteLine(message);
-					outWriter.WriteLine("\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",ok," + "ignored" + "," + "");
+					logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has the same material code(DB vs CSV)");
+					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",ok," + "ignored" + "," + "";
 				}
+
+
 				if (updateMaterial)
 				{
 					command = new MySqlCommand(string.Format(sqlUpdateMaterial, csvMaterialS4H, csvMaterialSKU), cnn);
 					updateResult = command.ExecuteNonQuery();
 					if (updateResult > 0)
 					{
-						outWriter.WriteLine(message);
 						logWriter.WriteLine("The material with SKU " + csvMaterialSKU + " was updated");
+						message = string.Format(message, "updated");
 					}
 					else
 					{
 						logWriter.WriteLine("The material with SKU " + csvMaterialSKU + " could not be updated");
+						message = string.Format(message, "error updating");
 					}
-					updateMaterial = false;
+					
 				}
+
+				updateMaterial = false;
+				outWriter.WriteLine(message);
 			}
 		}
 		cnn.Close();
