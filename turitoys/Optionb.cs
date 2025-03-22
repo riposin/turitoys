@@ -61,7 +61,7 @@ public static partial class Program
 			bool tableCreated = false;
 
 			// Avoid the first line that is the description of the field
-			csvReader.ReadFields();
+			// csvReader.ReadFields();
 			colFields = csvReader.ReadFields();
 
 			if (colFields != null)
@@ -70,11 +70,11 @@ public static partial class Program
 				{
 					foreach (string column in colFields)
 					{
-						DataColumn datecolumn = new(column)
+						DataColumn newcolumn = new(column)
 						{
 							AllowDBNull = true
 						};
-						csvData.Columns.Add(datecolumn);
+						csvData.Columns.Add(newcolumn);
 					}
 					tableCreated = true;
 				}
@@ -171,7 +171,7 @@ public static partial class Program
 		List<string[]> resultAll = [];
 		IReadOnlyCollection<DbColumn> columns;
 
-		message = "select o.S4H_Id, cast(pricelist as char) as pricelist, cast(truncate(price, 2) as char), DATE_FORMAT(fechainicio,'%Y%m%d') as fechainicio, DATE_FORMAT(fechafin,'%Y%m%d') as fechafin, conditionrecord\r\nfrom itm1 i\r\ninner join oitm o on o.ItemCode = i.ItemCode\r\nwhere pricelist in (" + combinations + ");";
+		message = "select o.S4H_Id, cast(pricelist as char) as pricelist, truncate(price, 2) as price, DATE_FORMAT(fechainicio,'%Y%m%d') as fechainicio, DATE_FORMAT(fechafin,'%Y%m%d') as fechafin, conditionrecord from itm1 i inner join oitm o on o.ItemCode = i.ItemCode where pricelist in (" + combinations + ");";
 		logWriter.WriteLine(message);
 		command = new MySqlCommand(message, cnn);
 		readerAll = command.ExecuteReader();
@@ -181,9 +181,19 @@ public static partial class Program
 		while (readerAll.Read())
 		{
 			string[] item = [];
+
 			foreach (DbColumn col in columns)
 			{
-				item = [.. item, (string)(readerAll[col.ColumnName] == DBNull.Value ? "" : readerAll[col.ColumnName].ToString())];
+				string value = readerAll[col.ColumnName] == DBNull.Value ? "" : readerAll[col.ColumnName].ToString();
+				
+				if (readerAll[col.ColumnName].GetType() == typeof(Decimal))
+				{
+					//Convert.ToDecimal(readerAll["price"]).ToString("0.####")
+					value = Convert.ToDecimal(readerAll["price"]).ToString("0.####");
+				}
+
+				//item = [.. item, (string)(readerAll[col.ColumnName] == DBNull.Value ? "" : readerAll[col.ColumnName].ToString())];
+				item = [.. item, value];
 			}
 			resultAll.Add(item);
 		}
@@ -232,8 +242,9 @@ public static partial class Program
 			csvMaterialINI = String.IsNullOrEmpty(mat["ConditionValidityStartDate"].ToString()) ? "" : mat["ConditionValidityStartDate"].ToString();
 			csvMaterialFIN = String.IsNullOrEmpty(mat["ConditionValidityEndDate"].ToString()) ? "" : mat["ConditionValidityEndDate"].ToString();
 			csvMaterialCRD = String.IsNullOrEmpty(mat["ConditionRecord"].ToString()) ? "" : mat["ConditionRecord"].ToString();
-			query = resultAll.Where(arr => arr[0] == csvMaterialS4H && arr[1] == csvMaterialCOM && arr[2] == csvMaterialPRC && arr[3] == csvMaterialINI && arr[4] == csvMaterialFIN );
+			query = resultAll.Where(arr => arr[0] == csvMaterialS4H && arr[1] == csvMaterialCOM && arr[2] == csvMaterialPRC && arr[3] == csvMaterialINI && arr[4] == csvMaterialFIN);
 			message = csvMaterialS4H + ", " + csvMaterialCOM + ", " + csvMaterialPRC + ", " + csvMaterialINI + ", " + csvMaterialFIN + ", \"" + csvMaterialCRD + "\"";
+
 			if (query.Count() == 0)
 			{
 				outWriter.WriteLine(message + ",not found");

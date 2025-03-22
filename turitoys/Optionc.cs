@@ -11,18 +11,22 @@ public static partial class Program
 
 		Console.Clear();
 		Console.WriteLine("""
-		Selected option was A
+		Selected option was C
 
 		Prerequisites:
 		1 - A CSV file named optioncin.csv with 3 columns [mat,des,sku] at least
 		2 - A TXT file named optionccnn.txt with the connection string to the SQLServer database
 		3 - The DB must contain at least the OITM table with the columns S4H_ID and ItemCode
-		4 - All prerequisite files are stored next to this turitoys app
+		4 - The OITM does not have any trigger like "GTS_TR_S4H_OITM_Actualizacion"
+		5 - All prerequisite files are stored next to this turitoys app
 
 		Results:
 		1 - A csv file named optioncout.csv.txt containing the result of the processing
 		2 - A log file named optionclog.txt
 		3 - All result files have the current date and time as preffix
+
+		Notes:
+		1 - This toy sets or updates the s4h_id code in all rows of the oitm table that match the SKU
 
 		Press Y to compare and update
 		Press V to just compare
@@ -224,6 +228,7 @@ public static partial class Program
 			{
 				updateMaterial = (option == "y");
 				dbMaterial = query.ToList();
+
 				if (String.IsNullOrEmpty(dbMaterial[0][2]))
 				{
 					noCodeItems++;
@@ -240,6 +245,7 @@ public static partial class Program
 				}
 				else
 				{
+					updateMaterial = false;
 					logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has the same material code(DB vs CSV)");
 					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",ok," + "ignored" + "," + "";
 				}
@@ -247,7 +253,15 @@ public static partial class Program
 				if (updateMaterial)
 				{
 					command = new SqlCommand(string.Format(sqlUpdateMaterial, csvMaterialS4H, csvMaterialSKU), cnn);
-					updateResult = command.ExecuteNonQuery();
+					try
+					{
+						updateResult = command.ExecuteNonQuery();
+					}
+					catch
+					{
+						logWriter.WriteLine("Material with issue: " + csvMaterialSKU);
+					}
+					
 					if (updateResult > 0)
 					{
 						logWriter.WriteLine("The material with SKU " + csvMaterialSKU + " was updated");

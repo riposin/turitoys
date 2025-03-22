@@ -6,8 +6,9 @@ header = """
 	Select an option or empty to close
 
 	A: Validate or set the s4h_id of materials to OITM table based on SKU (MySQL)
-	B: Verify material prices were updated correctly on table ITM1
+	B: Verify material prices were updated correctly on table ITM1 (MySQL)
 	C: Validate or set the s4h_id of materials to OITM table based on SKU (Microsoft SQL Server)
+	D: Create materials on OITM table (Microsoft SQL Server)
 	""";
 
 Console.WriteLine(header);
@@ -24,6 +25,9 @@ switch (option)
 		break;
 	case "c":
 		Program.Optionc();
+		break;
+	case "d":
+		Program.Optiond();
 		break;
 	default:
 		break;

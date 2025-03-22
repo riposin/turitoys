@@ -239,6 +239,7 @@ public static partial class Program
 				}
 				else
 				{
+					updateMaterial = false;
 					logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has the same material code(DB vs CSV)");
 					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",ok," + "ignored" + "," + "";
 				}
