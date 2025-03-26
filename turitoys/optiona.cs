@@ -149,6 +149,8 @@ public static partial class Program
 
 		// SKU always must be first element, check linq.first statement when verifying
 		message = "select itemcode as sku, itemname as des, s4h_id as mat from oitm;";
+		// Just temporal to extract prices
+		//message = "select m.itemcode as sku, m.itemname as des, m.s4h_id as mat, p.Price from oitm m inner join itm1 p on m.ItemCode = p.ItemCode where CURDATE() between p.FechaInicio and p.FechaFin";
 		logWriter.WriteLine(message);
 		command = new MySqlCommand(message, cnn);
 		readerAll = command.ExecuteReader();
@@ -160,7 +162,13 @@ public static partial class Program
 			string[] item = [];
 			foreach (DbColumn col in columns)
 			{
-				item = [.. item, (string)(readerAll[col.ColumnName] == DBNull.Value ? "" : readerAll[col.ColumnName])];
+				string value = readerAll[col.ColumnName] == DBNull.Value ? "" : readerAll[col.ColumnName].ToString();
+
+				if (readerAll[col.ColumnName].GetType() == typeof(Decimal))
+				{
+					value = Convert.ToDecimal(readerAll["price"]).ToString("0.####");
+				}
+				item = [.. item, value];
 			}
 			resultAll.Add(item);
 		}
@@ -202,6 +210,7 @@ public static partial class Program
 		int updateResult = -1;
 		string sqlUpdateMaterial = "update oitm set s4h_id='{0}' where itemcode='{1}';";
 
+		//outWriter.WriteLine("sku,mat,des,statusdb,result,prevcode,price");
 		outWriter.WriteLine("sku,mat,des,statusdb,result,prevcode");
 
 		foreach (DataRow mat in csvData.Rows)
@@ -217,6 +226,7 @@ public static partial class Program
 
 				message = csvMaterialSKU + " not found";
 				logWriter.WriteLine(message);
+				//outWriter.WriteLine("\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",not found," + "ignored" + "," + "" + "," + "");
 				outWriter.WriteLine("\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",not found," + "ignored" + "," + "");
 			}
 			else
@@ -228,6 +238,7 @@ public static partial class Program
 					noCodeItems++;
 
 					logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has no material code");
+					//message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",no code," + (updateMaterial ? "{0}" : "compared") + "," + "" + "," + dbMaterial[0][3];
 					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",no code," + (updateMaterial ? "{0}" : "compared") + "," + "";
 				}
 				else if (dbMaterial[0][2] != csvMaterialS4H)
@@ -235,12 +246,14 @@ public static partial class Program
 					diffCodeItems++;
 
 					logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has a different material code(DB vs CSV): " + dbMaterial[0][2] + " <-> " + csvMaterialS4H);
+					//message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",diff code," + (updateMaterial ? "{0}" : "compared") + "," + dbMaterial[0][2] + "," + dbMaterial[0][3];
 					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",diff code," + (updateMaterial ? "{0}" : "compared") + "," + dbMaterial[0][2];
 				}
 				else
 				{
 					updateMaterial = false;
 					logWriter.WriteLine("The material SKU " + csvMaterialSKU + " has the same material code(DB vs CSV)");
+					//message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",ok," + "ignored" + "," + "" + "," + dbMaterial[0][3];
 					message = "\"" + csvMaterialSKU + "\"," + csvMaterialS4H + ",\"" + csvMaterialDES + "\",ok," + "ignored" + "," + "";
 				}
 

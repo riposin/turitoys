@@ -188,11 +188,9 @@ public static partial class Program
 				
 				if (readerAll[col.ColumnName].GetType() == typeof(Decimal))
 				{
-					//Convert.ToDecimal(readerAll["price"]).ToString("0.####")
 					value = Convert.ToDecimal(readerAll["price"]).ToString("0.####");
 				}
 
-				//item = [.. item, (string)(readerAll[col.ColumnName] == DBNull.Value ? "" : readerAll[col.ColumnName].ToString())];
 				item = [.. item, value];
 			}
 			resultAll.Add(item);
